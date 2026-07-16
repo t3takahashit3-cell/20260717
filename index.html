@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ハラスメントチェックリスト</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            box-sizing: border-box;
+        }
+        h1, h2, h3 {
+            color: var(--primary-color);
+            text-align: center;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .hidden {
+            display: none !important;
+        }
+        /* Buttons */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            background-color: var(--secondary-color);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .btn-start {
+            background-color: #27ae60;
+            font-size: 18px;
+            margin-top: 30px;
+        }
+        .btn-start:hover {
+            background-color: #2ecc71;
+        }
+        .answer-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .btn-yes { background-color: #e74c3c; }
+        .btn-yes:hover { background-color: #c0392b; }
+        .btn-no { background-color: #2ecc71; }
+        .btn-no:hover { background-color: #27ae60; }
+        .btn-idk { background-color: #f39c12; }
+        .btn-idk:hover { background-color: #d35400; }
+        
+        /* Question Page & Progress Bar */
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .progress-text {
+            color: #7f8c8d;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .progress-container {
+            width: 100%;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            height: 12px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #27ae60;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .question-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9f9;
+            border-left: 5px solid var(--secondary-color);
+            border-radius: 4px;
+        }
+
+        /* Result Page */
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #e74c3c;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .result-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .result-desc {
+            background-color: #fdf2e9;
+            padding: 20px;
+            border-left: 5px solid #e67e22;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            white-space: pre-wrap;
+        }
+        
+        /* Accordion Review Section */
+        .review-section {
+            margin-top: 40px;
+            border-top: 2px solid #ecf0f1;
+            padding-top: 20px;
+        }
+        .accordion-item {
+            margin-bottom: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: #fcfcfc;
+        }
+        .accordion-header {
+            padding: 15px;
+            background-color: #f1f2f6;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        .accordion-header:hover {
+            background-color: #e4e7eb;
+        }
+        .accordion-header-title {
+            flex: 1;
+            padding-right: 15px;
+            font-size: 14px;
+            color: var(--primary-color);
+        }
+        .user-answer-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #fff;
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+        .badge-yes { background-color: #e74c3c; }
+        .badge-idk { background-color: #f39c12; }
+        .badge-no { background-color: #2ecc71; }
+
+        .accordion-body {
+            display: none;
+            padding: 20px;
+            background-color: #ffffff;
+            border-top: 1px solid #ddd;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .accordion-body:hover {
+            background-color: #fafafa;
+        }
+        .review-exp {
+            background-color: #f9ebea;
+            padding: 15px;
+            border-left: 4px solid #c0392b;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .review-good {
+            background-color: #eafaf1;
+            padding: 15px;
+            border-left: 4px solid #27ae60;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .accordion-icon {
+            font-size: 14px;
+            color: #7f8c8d;
+            transition: transform 0.3s;
+            margin-left: 10px;
+        }
+        .active .accordion-icon {
+            transform: rotate(180deg);
+        }
+        .close-hint {
+            text-align: right;
+            font-size: 11px;
+            color: #95a5a6;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Start Page -->
+    <div id="page-start">
+        <h1>あなたもやっているかもしれない？<br>「ハラスメントチェックリスト」</h1>
+        <p class="text-center">これから表示される全25問の質問に、「はい」「いいえ」「わからない」のどれかを選択してください。</p>
+        <button class="btn btn-start" onclick="startChecklist()">チェックを始める</button>
+    </div>
+
+    <!-- Question Page -->
+    <div id="page-question" class="hidden">
+        <div class="progress-header">
+            <span style="font-size: 14px; font-weight: bold; color: var(--primary-color);">診断状況</span>
+            <span class="progress-text" id="progress-text">1 / 25</span>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="question-text" id="question-text">質問テキスト</div>
+        <div class="answer-btns">
+            <button class="btn btn-yes" onclick="answer(4)">はい</button>
+            <button class="btn btn-idk" onclick="answer(2)">わからない</button>
+            <button class="btn btn-no" onclick="answer(0)">いいえ</button>
+        </div>
+    </div>
+
+    <!-- Result Page -->
+    <div id="page-result" class="hidden">
+        <h2>診断結果</h2>
+        <div class="score-display">合計 <span id="score-val">0</span> 点</div>
+        <div class="result-title" id="result-title">タイトル</div>
+        <div class="result-desc" id="result-desc">説明テキスト</div>
+        
+        <!-- Accordion Section -->
+        <div class="review-section">
+            <h3>回答一覧と研修振り返り</h3>
+            <p class="text-center" style="font-size: 13px; color: #7f8c8d; margin-bottom: 20px;">
+                ※設問をクリックすると「解説」と「好例」が展開します。展開したエリアをクリックすると閉じます。
+            </p>
+            <div id="review-list"></div>
+        </div>
+
+        <button class="btn btn-start" style="margin-top: 30px;" onclick="resetChecklist()">もう一度チェックする</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "1. ミスをした本人の気づきや再発防止を促すために、あえて事務所や施設内など、他の同僚がいる前で「ここ、また間違っているよ」とその場ですぐに指摘している。", exp: "【解説】公開の場での叱責は、本人にとって「指導」ではなく「恥をかかせる見せしめ（精神的な攻撃）」になります。本人のプライドが傷つき、防衛本能が働くため、せっかくの指導内容が頭に入らなくなります。", good: "【好例（こうすればよい）】周囲の目が届かない個室や、他のスタッフに声が届かない場所に移動し、1対1で「指導」を行います。または「あとで少し時間をもらえる？」と声をかけ、別室でフィードバックします。" },
+        { q: "2. 同じ間違いを繰り返さないように、あえて「前も言ったよね？これじゃお客様（利用者様）に怒られるよ？だから信用されないんだよ」と強い語気で指導することがある。", exp: "【解説】ミスそのもの、そこに至った行動について指導することは問題ありません。しかし「信用されない」など、ミスそのものの指導を超えて「相手の人格や人間性」にまで言及することは、指導の適正範囲を超えた人格否定にあたります。", good: "【好例（こうすればよい）】感情的な言葉や人格否定は避け、起きた「事実（ミス）」と「具体的な再発防止策」に絞って指導します。「前も同じ間違いがあったから、手順書のこのステップをもう一度一緒に確認しよう」と伝えます。" },
+        { q: "3. 本人に自分で考える力を養ってほしいので、ミスをした後輩に「なんでこれができなかったの？」と答えを教えずに、突き放す態度を取っている。", exp: "【解説】突き放すだけでは、単なる「嫌がらせ」や「放置」と受け取られます。自立を促すことと、業務上必要なサポート（ヒントやアプローチ法の提示）を放棄することは別です。", good: "【好例（こうすればよい）】「どうすれば防げたと思う？」と問いかけて考えさせた後、本人の答えを聞き、「もし分からなければ、一緒に原因を整理しよう」と伴走する姿勢を示します。" },
+        { q: "4. 相手の将来のことを考え、「この仕事、向いてないんじゃない？」「辞めたら？」といった厳しい言葉で発破をかけることがある。", exp: "【解説】「辞めたら」という言葉は、雇用不安を煽る精神的な攻撃であり、典型的なパワハラ発言です。本人の成長を促すための発破としては過剰で、相手を絶望させるだけです。", good: "【好例（こうすればよい）】「今のやり方のままだとミスが続くから、まずはこの部分のスキルを克服しよう。あなたならできるようになるから」と、仕事に向き合うための具体的な課題と期待を伝えます。" },
+        { q: "5. 自分の若い頃、厳しい指導や高い営業目標を乗り越えて成長した成功体験があるため、後輩にも「自分たちが若い頃はもっと大変だった」と引き合いに出して同等の厳しさを求める。", exp: "【解説】過去の自分の価値観を、現在の労働環境や異なる個人の基準に強要することは、現代の適切な「業務の範囲」を超えた不当な要求とみなされるリスクが高いです。", good: "【好例（こうすればよい）】「時代のルールや現在の業務手順」を基準にし、現在の指導プログラムや本人の習熟度に合わせて段階的に指導します。自身の過去話は「参考程度」に留めます。" },
+        { q: "6. 目の前のケア、顧客からの緊急連絡、締め切り直前の事務作業などを遅滞なく終わらせるため、話しかけられても手を止めず、パソコン画面や書類を見たまま「あとにして！」と冷たく対応する。", exp: "【解説】相手に「私は拒絶された」「あの人には話しかけてはいけない」という心理的萎縮を与えます。相談窓口へのハラスメント相談で非常に多い「高圧的な態度」の代表例です。", good: "【好例（こうすればよい）】「今急ぎの処理をしていて手が離せないから、10分後（または〇〇時）にこちらから声をかけてもいい？」と、対応できない理由と次の時間を具体的に提示します。" },
+        { q: "7. 周囲に言葉で直接忙しさを伝えるのではなく、ため息をついたり、電卓やファイルを大きな音で置くなどして、『察してほしい（不機嫌だ）』という態度を示す。", exp: "【解説】「フキハラ（不機嫌ハラスメント）」と呼ばれる威圧行為です。周囲は不機嫌な人の顔色を窺わなければならなくなり、職場全体の心理的安全性を著しく低下させます。", good: "【好例（こうすればよい）】不機嫌さを態度で周囲に察せさせるのではなく、忙しい時は「今、締め切り（またはトラブル対応）直前で少しバタバタしているんだ」と事実を言葉で冷静に伝えます。" },
+        { q: "8. 現場の混乱や、顧客への納期遅れを防ぐため、後輩の意見に対し「いや、そんなの現場で通用するわけないでしょ」と即座に却下・修正することがある。", exp: "【解説】意見を言うたびに全否定されると、相手は思考停止に陥り、「言われたことだけをやればいい」という指示待ち人間に。提案や報告をする意欲を奪う行為です。", good: "【好例（こうすればよい）】「意見を言ってくれてありがとう。ただ、現場（またはお客様）では〇〇という懸念点があるから、そこをクリアするにはどうすればいいか一緒に考えよう」と、一度受け止めた上で対話します。" },
+        { q: "9. 何度指導しても態度や業務のやり方が改まらないスタッフに対し、挨拶を簡素にしたり、業務連絡以外の会話を避けるなど意図的に距離を置いた態度をとる。", exp: "【解説】「人間関係からの切り離し（無視・孤立）」に該当する可能性が高いです。「気に入らない相手に罰を与えるために態度を変える」という行為はハラスメントそのものです。", good: "【好例（こうすればよい）】指導がうまくいかない時こそ、挨拶や最低限のコミュニケーションは他のスタッフと全く同じ熱量で一貫して行います。「指導」と「個人の感情」を完全に切り離します。" },
+        { q: "10. 十分な信頼関係ができている、または相手はタフだと信じているからこそ、遠慮のないフランクな言葉遣いや「お前」「あんた」といった呼び方で本音のコミュニケーションをしている。", exp: "【解説】「お前」「あんた」といった呼称は、職場における対等な尊厳を否定する言葉であり、優越的な関係を背景とした精神的嫌がらせに繋がります。本人がどれだけ「大丈夫」と言っていても、内心では不快に思っているケースが多々あります。", good: "【好例（こうすればよい）】信頼関係の深さに関わらず、職場内では「〇〇さん」「〇〇くん」と名前で呼び、節度ある丁寧な言葉遣いをベースにします。アットホームであっても「公私のライン」は守ります。" },
+        { q: "11. 各職種の役割やプロ意識を自覚させるために、「現場（介護職）なんだから」「事務職なんだから」「営業（相談員）なんだから」と、職種や部門を強調して不満や要望を言う。", exp: "【解説】職種に対するバイアス（偏見）であり、職場の対立構造を生み出す原因になります。それぞれの職種の専門性を尊重しない言動は、関係性を阻害するハラスメント要因になります。", good: "【好例（こうすればよい）】主語を「職種」にせず、「業務プロセス」に焦点を当てます。「〇〇の入力が遅れると、次の〇〇の作業に影響が出るので、どうすればお互いスムーズに連携できるか協力して改善できないかな」と提案します。" },
+        { q: "12. 福祉用具を扱うプロとしての最低限の知識を持ってほしいから、不慣れな他部署のスタッフや事務職に対して「こんな制度（または商品知識）も知らないの？」と指導する。", exp: "【解説】自分の専門知識を基準に、他人の無知をバカにする態度（マウンティング）は、業務上必要のない精神的な攻撃です。不慣れな相手に対する配慮が欠けています。", good: "【好例（こうすればよい）】「この制度（商品知識）は他部署からだと分かりにくいよね。大事なポイントを説明するから、次回の参考にしてみてね」と、相手の専門外であることを前提に、分かりやすく教えます。" },
+        { q: "13. 「早く仕事の流れを覚えてもらう」という目的で、特定の若手や大人しいスタッフに、多めの事務処理や、面倒な顧客対応の引き継ぎなどを多く割り振ってこなさせる。", exp: "【解説】「過大な要求」または「嫌がらせ目的の偏った業務配置」とみなされます。キャパシティを超えた業務を「勉強」という名目で特定の人に押し付けるのはアンフェアです。", good: "【好例（こうすればよい）】誰にどの仕事がどれだけ割り振られているかをチーム内で可視化し、属人化を避けて公平に分担します。若手に任せる際は「今回は〇〇のスキルを身につけてもらうために任せたい」と目的を明確にします。" },
+        { q: "14. 施設運営や、福祉用具の納品・配送トラブルを遅滞なく解決するために、相手の現在の状況や予定を確認せず「これ、今すぐやって」「今日中に絶対終わらせて」と急ぎの仕事を押し付ける。", exp: "【解説】相手の予定や負担を顧みない突発的な期限の強要は、優越的な立場を利用した「過大な要求（業務の強要）」にあたり、相手の就業環境を大きく害します。", good: "【好例（こうすればよい）】「急なトラブルで申し訳ないんだけど、今の手持ちのタスク状況はどう？ 今日中にこれを差し込みたいんだけど、調整できそうかな？」と、相手の状況を確認・相談しながら指示を出します。" },
+        { q: "15. 業務の遅れや納品ミスの原因を周囲と共有し、チームとして対策を講じるために、原因となった個人への指導内容を、他のメンバーにもチャットで共有している。", exp: "【解説】デジタル上の「公開処刑」です。再発防止を盾にした、過剰な精神的攻撃（名誉感情・プライバシーの侵害）にあたり、被害者を過度に追い詰める結果になります。", good: "【好例（こうすればよい）】個人への指導や注意は、チャットであってもダイレクトメッセージ（DM）等で1対1で行います。全体への共有は、個人名を完全に伏せた上で「全体への注意喚起（再発防止策）」として一般化して発信します。" },
+        { q: "16. 「厳しい上下関係をなくし、風通しの良い職場にしたい」という意図で、先輩である自分から後輩に対して敬語を一切使わず、フレンドリー（タメ口）に接している。", exp: "【解説】一見フランクですが、「上司・先輩は何を言ってもいい」という非対称な関係を補強しやすくなります。心理的な上下関係が固定化され、意見が言いづらい環境を作ってしまいます。", good: "【好例（こうすればよい）】後輩や年下であっても、職場においては基本的には「〜さん」と呼び、丁寧語（敬語）をベースにします。親しみやすさは「話しやすい傾聴の態度（うなずきや質問）」で表現します。" },
+        { q: "17. 職場の緊張を和らげる「コミュニケーションの一環」として、相手の見た目、持ち物、あるいは独身・既婚といった個人の特徴は冗談交じりに話題にするようにしている。", exp: "【解説】業務に不要な個人の属性（プライベート情報）に過度に踏み込むことは、「個の侵害（プライバシー侵害）」であり、不快感を与えるセクハラにも該当します。", good: "【好例（こうすればよい）】プライベートな特徴をいじるのではなく、業務に関連する努力や成果、あるいは「いつも整理整頓が綺麗だね」「丁寧な対応をしてくれているね」といった、仕事に取り組む姿勢を話題にして褒めます。" },
+        { q: "18. 「親睦を深めたい」「コミュニケーションを円滑にしたい」という善意から、「彼氏（彼女）はいるの？」「いつ結婚するの？」など、本人の恋愛や結婚観について質問する。", exp: "【解説】性的な関心に基づく発言、または私的な領域への不当な介入であり、典型的なセクハラ行為です。本人が嫌と言えない立場であることを忘れてはなりません。", good: "【好例（こうすればよい）】業務に関係のない、個人のプライベートな交際・婚姻状況については自ら質問しません。本人が自発的に話してきた場合も、深掘りせず「そうなんだね」と聴くに留めます。" },
+        { q: "19. 相手の容姿やスタイルなど、認めるべきところは「今日も綺麗だね」「スタイルいいね」など、はっきり褒めるようにしている。", exp: "【解説】「褒めているからセーフ」はセクハラにおいては通用しません。職場において他者の身体的特徴・容姿について評価すること自体が不快感を与えるリスク（環境型セクハラ）になります。", good: "【好例（こうすればよい）】容姿や体型などの身体的特徴を評価するのではなく、業務での「気づかい」「迅速な対応」「書類作成の正確さ」など、本人の『行動や成果（プロセス）』を具体的に褒めます。" },
+        { q: "20. 明日のシフトをスムーズにするため、または翌朝の営業・配送準備に遅れが出ないように、勤務時間外や休日であっても、LINE等で業務の注意点や指導内容を日常的に送る。", exp: "【解説】相手のプライベートな時間（休息権）を不当に侵食する行為です。通知を見るだけで本人はストレスを感じ、時間外労働の強要とみなされるリスクもあります。", good: "【好例（こうすればよい）】緊急時を除き、休日の連絡は避けます。忘れないうちに送りたい場合は、メールやビジネスチャットの「送信予約機能（翌営業日の朝に届く設定）」を活用します。" },
+        { q: "21. チームワークの向上や業界知識の向上に役立つと確信しているからこそ、社内の勉強会、飲み会、あるいは地域のイベント等に「強制じゃないけど、全員来るよね？」と強く参加を促す。", exp: "【解説】「強制じゃないけど」と言いつつ、同調圧力をかける行為は事実上の強制であり、「個の侵害」または「不当な業務範囲外の強要」にあたります。", good: "【好例（こうすればよい）】「自由参加の勉強会があるから、もし都合が良ければ気軽に来てね。不参加でも仕事の評価などには一切影響しないから安心してね」と、本当に自由であることを明確に伝えます。" },
+        { q: "22. 産休・育休から復帰したスタッフや、時短勤務中のスタッフに対して、本人の意向よりもまず負担の軽い作業のみを振り分けるようにしている。", exp: "【解説】「配慮という名のマタハラ・ケアハラ（不当なキャリア機会の損失）」です。「大変だろうから」と良かれと思って勝手に判断せず、必ず本人の意向とキャリア形成への配慮を確認する必要があります。", good: "【好例（こうすればよい）】「体調や家庭の両立状況を考慮しつつ、どのような業務や目標であれば無理なくチャレンジできそうか」を、定期的な面談を通じて本人の意向を丁寧に確認しながら決定します。" },
+        { q: "23. 妊娠・出産、または育児中のスタッフが急な休みや時短勤務をとる際、他のメンバーにしわ寄せがいっている現実を前にして、つい本人や周囲に「あの人が休む（早く帰る）から、こっちの負担が増えるね」「妊婦さんはいいね」と愚痴をこぼしてしまう。", exp: "【解説】妊娠・出産、育児を理由に制度を利用するスタッフに対する不満や愚痴を言うことは、周囲からの精神的な嫌がらせを誘発する「環境型のマタニティハラスメント」にあたります。", good: "【好例（こうすればよい）】負担が増えることへの不満は本人や周囲にぶつけるのではなく、管理者（上司）に「業務過多の現状」を相談し、人員配置やチーム全体の仕事量の調整を論理的に求めます。" },
+        { q: "24. 家族の介護や看病をしながら働くスタッフに対して、「無理しないでね」言いつつも、「介護（看病）があるなら、責任のある仕事は任せられないね」と、本人の意思を確認せずに判断を下す。", exp: "【解説】「ケアハラ（介護ハラスメント）」です。仕事と家庭の両立を目的とする制度利用を理由に、本人の合意なく勝手にキャリアを狭める行為は、育児介護休業法にも違反する不利益扱いです。", good: "【好例（こうすればよい）】「今のご家庭の状況で、プロジェクトリーダー（または責任ある役割）を任せることは時間的・精神的に難しそうか、あるいはやりたい意欲があるか」を本人に直接確認し、両立できる方法を一緒に模索します。" },
+        { q: "25. 育児や介護による急な欠勤や早退に対して、「仕方がない」と頭では理解しつつも、電話口や引き継ぎの際、無意識に少しトーンの低い声や、素っ気ない態度（または大きなため息）で応対してしまう。", exp: "【解説】突発的な欠員に対する不満や困惑を、態度や声色に出して伝えることは、「制度を利用しづらくさせる嫌がらせ（制度利用の阻害）」であり、マタハラ・ケアハラに該当します。", good: "【好例（こうすればよい）】「連絡ありがとう。ご家族は大丈夫？ こっちの仕事はなんとかカバーしておくから、安心して看病（対応）に専念してね」と、まずは安心させる一言を普段通りのトーンで伝えます。" }
+    ];
+
+    let currentQuestionIndex = 0;
+    let totalScore = 0;
+    let userAnswers = [];
+
+    const pageStart = document.getElementById('page-start');
+    const pageQuestion = document.getElementById('page-question');
+    const pageResult = document.getElementById('page-result');
+    
+    const progressText = document.getElementById('progress-text');
+    const progressBar = document.getElementById('progress-bar');
+    const questionText = document.getElementById('question-text');
+    
+    const scoreVal = document.getElementById('score-val');
+    const resultTitle = document.getElementById('result-title');
+    const resultDesc = document.getElementById('result-desc');
+
+    function startChecklist() {
+        pageStart.classList.add('hidden');
+        pageQuestion.classList.remove('hidden');
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        // テキストの進捗表示
+        progressText.innerText = `${currentQuestionIndex + 1} / ${questions.length}`;
+        
+        // プログレスバーの更新
+        const progressPercent = ((currentQuestionIndex + 1) / questions.length) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+
+        // 質問テキストの設定
+        questionText.innerText = questions[currentQuestionIndex].q;
+    }
+
+    function answer(score) {
+        let answerStr = "";
+        if (score === 4) answerStr = "はい";
+        else if (score === 2) answerStr = "わからない";
+        else answerStr = "いいえ";
+        
+        userAnswers.push(answerStr);
+        totalScore += score;
+        currentQuestionIndex++;
+        
+        if (currentQuestionIndex < questions.length) {
+            renderQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        pageQuestion.classList.add('hidden');
+        pageResult.classList.remove('hidden');
+        
+        scoreVal.innerText = totalScore;
+        
+        if (totalScore >= 77) {
+            resultTitle.innerHTML = "どどーん。あなたは完全に「ハラスメント体質」です<br>【現在の状態：職場の暴君・アンタッチャブル存在】";
+            resultDesc.innerHTML = "非常に強い「責任感」や「仕事へのこだわり」、あるいは「過去の成功体験」が完全に暴走してしまっています。\nあなたの正論や指導は、もはや相手にとって「ただの攻撃（恐怖政治）」として機能しています。\n\n⚠️ 危険なサイン：\n周囲があなたに過剰に気を遣っていたり、ミスをした部下があなたへの報告を後回しにしていませんか？ それは「言うことを聞いている」のではなく、「恐怖で萎縮して、本音や不都合な真実を隠している」だけです。\n今日この瞬間から、これまでの「手段（伝え方・態度）」を180度見直しましょう。まだ間に合います！";
+        } else if (totalScore >= 49) {
+            resultTitle.innerHTML = "イエローカード！周囲を凍りつかせる「ボスキャラ」一歩手前<br>【現在の状態：悪気のない「正論モンスター」】";
+            resultDesc.innerHTML = "「仕事はきっちりやるべき」「相手の成長のため」という100%正しい大義名分を盾に、相手の尊厳を削る言葉や態度を無意識に垂れ流しています。\n\n⚠️ 危険なサイン：\n「あの子のためを思って厳しく言った」「この忙しい現場を回すには仕方がない」と言い訳していませんか？ 相手はあなたのことを「仕事はできるけれど、関わるとすり減る恐い人」だと思っているかもしれません。正しいことを伝える時こそ、相手の感情に配慮する「アサーティブな（対等な）伝え方」が必要です。";
+        } else if (totalScore >= 11) {
+            resultTitle.innerHTML = "ハラスメント予備軍！「心の余裕」で裏表が変わるグレーゾーン<br>【現在の状態：時々、鬼に変身する人】";
+            resultDesc.innerHTML = "普段は温厚で話しやすい良い先輩・同僚なのですが、自分のタスクが限界になったり、想定外のトラブルが起きたりすると、途端にハラスメントリスクが高まるタイプです。\n\n⚠️ 危険なサイン：\n忙しい時に話しかけられて、ついため息をついたり、無言で電卓を強く叩いたりしていませんか？ あなたの「余裕のなさ」は、周囲にとって「いつ爆発するか分からない爆弾」のように見えています。イラッとしたときこそ「6秒間」呼吸を整え、自分の不機嫌を周囲にまき散らさないコントロール（アンガーマネジメント）を意識しましょう。";
+        } else {
+            resultTitle.innerHTML = "グリーンライト！職場のオアシス（ただし「事なかれ主義」に注意）<br>【現在の状態：心理的安全性の守護神】";
+            resultDesc.innerHTML = "相手への配慮や適切なコミュニケーションがしっかりとれており、ハラスメントのリスクは極めて低いです。\n\n⚠️ 危険なサイン：\nただし、ハラスメントを恐れるあまり、「言うべき指導や、耳の痛い注意を避ける（放置する）」という事態に陥っていませんか？\n本当の優しさとは、相手の顔色を窺うことではなく、相手の成長のために「敬意を持った言葉で、毅然と伝えること」です。自信を持って、愛のある適切な指導を続けてください！";
+        }
+
+        renderReview();
+    }
+
+    function renderReview() {
+        const reviewList = document.getElementById('review-list');
+        reviewList.innerHTML = '';
+        
+        questions.forEach((q, index) => {
+            const userAnswer = userAnswers[index];
+            let badgeClass = "badge-no";
+            if (userAnswer === "はい") badgeClass = "badge-yes";
+            else if (userAnswer === "わからない") badgeClass = "badge-idk";
+            
+            const itemHTML = `
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <div class="accordion-header-title">${q.q}</div>
+                        <span class="user-answer-badge ${badgeClass}">回答: ${userAnswer}</span>
+                        <span class="accordion-icon">▼</span>
+                    </div>
+                    <div class="accordion-body" onclick="closeAccordion(this)">
+                        <div class="review-exp">${q.exp}</div>
+                        <div class="review-good">${q.good}</div>
+                        <div class="close-hint">※この解説エリアをクリックすると閉じます</div>
+                    </div>
+                </div>
+            `;
+            reviewList.innerHTML += itemHTML;
+        });
+    }
+
+    function toggleAccordion(header) {
+        const item = header.parentElement;
+        const body = item.querySelector('.accordion-body');
+        
+        if (body.style.display === "block") {
+            body.style.display = "none";
+            item.classList.remove('active');
+        } else {
+            body.style.display = "block";
+            item.classList.add('active');
+        }
+    }
+
+    function closeAccordion(body) {
+        const item = body.parentElement;
+        body.style.display = "none";
+        item.classList.remove('active');
+    }
+
+    function resetChecklist() {
+        currentQuestionIndex = 0;
+        totalScore = 0;
+        userAnswers = [];
+        pageResult.classList.add('hidden');
+        pageStart.classList.remove('hidden');
+    }
+</script>
+
+</body>
+</html>
